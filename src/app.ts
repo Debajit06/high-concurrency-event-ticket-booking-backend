@@ -1,14 +1,19 @@
 import express from "express";
-
+import prisma from "./lib/prisma";
 
 const app = express();
 app.use(express.json());
 
-app.get("/health",(req,res)=>{
-    res.status(200).json({
-        status:"OK",
-        message:"Server is healthy"
-    })
+app.get("/health",async(req,res)=>{
+    try{
+        await prisma.$queryRaw`SELECT 1`
+        res.status(200).json({status:"OK",message:"Server is healthy",database:"connected"})
+
+    } catch(error){
+        res.status(503).json({status:"error",message:"Database connection failed",error})
+
+    }
+    
 })
 
 
