@@ -28,6 +28,54 @@ model User {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
+  events   Event[]
+
   @@map("users")
 }
+
+
+
+model Venue{
+  id String @id @default(cuid())
+  name String
+  address String
+  city String
   
+  capacity Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  events Event[]
+  seats  Seat[] 
+  
+  @@map("venues")
+}
+
+model Event{
+  id String @id @default(cuid())
+  title String
+  description String
+  startTime DateTime
+  endTime DateTime
+  venueId String
+  organizerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  venue Venue @relation(fields: [venueId], references: [id])
+  organizer User @relation(fields: [organizerId], references: [id])
+  @@map("events")
+}
+  
+model Seat{
+  id String @id @default(cuid())
+  venueId String
+  section String
+  row String
+  seatNumber Int
+  createdAt DateTime @default(now())
+  
+  venue      Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  @@unique([venueId, section, row, seatNumber])
+  @@map("seats")
+}
