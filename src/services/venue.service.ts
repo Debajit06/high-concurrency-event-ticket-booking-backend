@@ -29,4 +29,37 @@ export const getAllVenues = async()=>{
     })
 }
 
+export interface seatInput {
+    section:string,
+    row:string,
+    seatNumber:number
+
+}
+
+export const addSeatToVenue=async(venueId:string,seats:seatInput[])=>{
+    const venue=await prisma.venue.findUnique({
+        where:{
+            id:venueId
+        }
+    })
+    if(!venue){
+        throw new Error("venue not found")
+    }
+
+    const seatData=seats.map((seat)=>({
+        venueId,
+        section:seat.section,
+        row:seat.row,
+        seatNumber:seat.seatNumber
+
+    }));
+
+    return await prisma.seat.createMany({
+        data:seatData,
+        skipDuplicates:true
+    })
+
+    
+}
+
 

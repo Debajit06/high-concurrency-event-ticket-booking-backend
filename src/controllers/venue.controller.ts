@@ -1,5 +1,6 @@
 import { Request,Response } from "express";
-import {createVenue, getAllVenues} from "../services/venue.service"
+import {createVenue, getAllVenues,addSeatToVenue} from "../services/venue.service"
+import { count } from "node:console";
 
 
 
@@ -50,5 +51,41 @@ export const getAllVenueHandler=async(req:Request,res:Response)=>{
             error
         });
 
+    }
+}
+
+export const addSeatHandler=async(req:Request,res:Response)=>{
+    try{
+        const{venueId}=req.params;
+        const{seats}=req.body;
+
+        if(!venueId || typeof venueId != 'string'){
+            return res.status(400).json({
+                message:"Venue ID is required"
+            });
+        }
+        if(!Array.isArray(seats)||seats.length===0){
+            return res.status(400).json({
+                message:"seats must be a non-empty array"
+            })
+        }
+
+        const result=await addSeatToVenue(venueId,seats);
+
+        return res.status(201).json({
+            message:"Seats added successfully",
+            count:result.count,
+        })
+        
+    } catch(error:any){
+        if(error.message==="venue not found"){
+            return res.status(404).json({
+                message:"venue not found"
+            });
+        }
+        return res.status(500).json({
+            message:"Internal server error",
+            error
+        })
     }
 }
