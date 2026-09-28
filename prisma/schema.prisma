@@ -18,7 +18,10 @@ enum Role {
   ORGANIZER
   ADMIN
 }
-
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
 model User {
   id       String @id @default(cuid())
   email    String @unique
@@ -29,6 +32,8 @@ model User {
   updatedAt  DateTime  @updatedAt
 
   events   Event[]
+  holds    SeatHold[]
+  bookings Booking[] 
 
   @@map("users")
 }
@@ -64,6 +69,8 @@ model Event{
 
   venue Venue @relation(fields: [venueId], references: [id])
   organizer User @relation(fields: [organizerId], references: [id])
+  holds    SeatHold[]
+  bookings Booking[]
   @@map("events")
 }
   
@@ -77,5 +84,41 @@ model Seat{
   
   venue      Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
   @@unique([venueId, section, row, seatNumber])
+  holds    SeatHold[]
+  bookings Booking[]  
   @@map("seats")
+}
+
+model SeatHold {
+  id        String   @id @default(cuid())
+  eventId   String
+  seatId    String
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  seat      Seat     @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, seatId])
+  @@map("seat_holds")
+}
+
+model Booking {
+  id             String        @id @default(cuid())
+  eventId        String
+  seatId         String
+  userId         String
+  status         BookingStatus @default(CONFIRMED)
+  idempotencyKey String?       @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  event          Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  seat           Seat          @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, seatId])
+  @@map("bookings")
 }
