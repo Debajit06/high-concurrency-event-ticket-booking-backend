@@ -2,6 +2,7 @@ import express from "express";
 import prisma from "./lib/prisma";
 import authRouter from "./routes/auth.routes";
 import venueRouter from "./routes/venue.routes";
+import eventRoutes from "./routes/event.routes";
 
 const app = express();
 app.use(express.json());
@@ -19,6 +20,6 @@ app.get("/health",async(req,res)=>{
 })
 app.use("/api/auth",authRouter);
 app.use("/api/venues",venueRouter)
-
+app.use("/api/events",eventRoutes);
 
 export default app;
