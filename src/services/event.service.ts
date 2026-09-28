@@ -93,4 +93,30 @@ export const getEvents = async (query: { city?: string; page?: number; limit?: n
   };
 };
 
+export const getEventSeat=async(eventId:string)=>{
+  const event=await prisma.event.findUnique({
+    where:{
+      id:eventId
+    },select:{
+      id:true,
+      title:true,
+      venueId:true
+    }
+  })
+  if(!event){
+    throw new Error("Event not found!")
+  }
+
+  const seats= await prisma.seat.findMany({
+    where:{ venueId:event.venueId},
+    orderBy: [
+      { section: "asc" },
+      { row: "asc" },
+      { seatNumber: "asc" },
+    ]
+  })
+  
+  return { event, seats };
+  
+}
 

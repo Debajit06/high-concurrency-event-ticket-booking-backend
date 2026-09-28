@@ -1,6 +1,6 @@
-import { Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware";
-import {createEvent,getEvents} from '../services/event.service';
+import {createEvent,getEvents,getEventSeat} from '../services/event.service';
+import { Request,Response } from "express";
 
 
 
@@ -63,3 +63,21 @@ export const getEventsHandler = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
+
+export const getEventSeatHandler=async(req:Request,res:Response)=>{
+  try{
+    const eventId = typeof req.params.eventId === "string" ? req.params.eventId : undefined;
+     if (!eventId) {
+      return res.status(400).json({ message: "Valid Event ID is required" });
+    }
+    const result=await getEventSeat(eventId)
+    return res.status(200).json(result);
+
+
+  } catch(error:any){
+      return res.status(500).json({ message: error.message || "Internal server error" });
+
+  }
+
+}
+    
