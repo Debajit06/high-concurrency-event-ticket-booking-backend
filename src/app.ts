@@ -3,6 +3,7 @@ import prisma from "./lib/prisma";
 import authRouter from "./routes/auth.routes";
 import venueRouter from "./routes/venue.routes";
 import eventRoutes from "./routes/event.routes";
+import bookigRouter from "./routes/booking.routes";
 
 const app = express();
 app.use(express.json());
@@ -21,5 +22,6 @@ app.get("/health",async(req,res)=>{
 app.use("/api/auth",authRouter);
 app.use("/api/venues",venueRouter)
 app.use("/api/events",eventRoutes);
+app.use("/api/bookings",bookigRouter);
 
 export default app;
