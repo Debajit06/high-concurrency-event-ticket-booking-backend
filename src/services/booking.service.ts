@@ -1,7 +1,10 @@
 import prisma from "../lib/prisma";
+import { bookingQueue } from "../queues/booking.queue";
+import { emailQueue } from "../queues/email.queue";
+
 
 export const holdSeat = async (eventId: string, seatId: string, userId: string) => {
-  return await prisma.$transaction(async (tx) => {
+  const hold= await prisma.$transaction(async (tx) => {
     const existingBooking = await tx.booking.findUnique({
       where: {
         eventId_seatId: { eventId, seatId },
@@ -33,7 +36,7 @@ export const holdSeat = async (eventId: string, seatId: string, userId: string) 
       });
     }
 
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const expiresAt = new Date(Date.now() +10* 60 * 1000);
 
     return await tx.seatHold.create({
       data: {
@@ -50,6 +53,21 @@ export const holdSeat = async (eventId: string, seatId: string, userId: string) 
       },
     });
   });
+
+  await bookingQueue.add(
+    "expire-hold",
+    {
+      holdId:hold.id,
+      eventId:hold.eventId,
+      seatId:hold.seatId
+    },
+    {
+      delay:10*60*1000,
+      
+    }
+  );
+  return hold;
+
 };
 
 export const confirmBooking = async (
@@ -58,8 +76,8 @@ export const confirmBooking = async (
   seatId: string,
   idempotencyKey: string
 ) => {
-  return await prisma.$transaction(async (tx) => {
-    // 1. Idempotency check: if already confirmed with this key, return it safely
+  const booking =await prisma.$transaction(async (tx) => {
+    
     const existingBooking = await tx.booking.findUnique({
       where: { idempotencyKey },
       include: {
@@ -67,6 +85,7 @@ export const confirmBooking = async (
         event: {
           select: { title: true },
         },
+        user:{select:{email:true,name:true}},
       },
     });
 
@@ -108,7 +127,15 @@ export const confirmBooking = async (
         event: {
           select: { title: true },
         },
+        user:{select:{email:true,name:true}},
       },
     });
   });
+  await emailQueue.add("send-confirmation-email", {
+  to: booking.user.email,
+  bookingId: booking.id,
+  eventTitle: booking.event.title,
+  seatInfo: `${booking.seat.section} Row ${booking.seat.row} Seat ${booking.seat.seatNumber}`,
+});
+return booking;
 };
