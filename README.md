@@ -4,6 +4,9 @@ A production-style modular monolith REST API built with **Node.js, TypeScript, E
 
 Engineered specifically to solve the hard problems of ticket booking systems: **race conditions, temporary inventory holds, zero double-booking, idempotency, delayed expiration workers, and asynchronous background email delivery**.
 
+> 🔗 **Live Production API**: [https://high-concurrency-event-ticket-booking.onrender.com](https://high-concurrency-event-ticket-booking.onrender.com)  
+> 🏥 **Health Check**: [https://high-concurrency-event-ticket-booking.onrender.com/health](https://high-concurrency-event-ticket-booking.onrender.com/health)
+
 ---
 
 ## 🏗️ System Architecture
