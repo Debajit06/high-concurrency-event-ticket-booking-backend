@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
 import {redisConnection} from "../lib/redis";
-import { Connection } from "pg";
+
 
 
 export interface HoldExpirationJobData {
